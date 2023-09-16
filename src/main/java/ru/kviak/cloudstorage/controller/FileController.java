@@ -13,6 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import ru.kviak.cloudstorage.dto.UserFileDto;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,8 +28,8 @@ public class FileController {
 
     private final MinioClient minioClient;
 
-    @PostMapping("/minio")
-    public String uploadFileMinio(@RequestParam("file") MultipartFile file) throws IOException {
+    @PostMapping("/file") // add file to bucket
+    public String uploadFile(@RequestParam("file") MultipartFile file) {
         String fileUploadStatus;
         try {
             minioClient.putObject(
@@ -46,8 +47,8 @@ public class FileController {
         return fileUploadStatus;
     }
 
-    @GetMapping("/minio/{path:.+}")
-    public ResponseEntity<Resource> downloadFileMinio(@PathVariable("path") String filename) {
+    @GetMapping("/file/{path:.+}") // get one file from bucket
+    public ResponseEntity<Resource> downloadFile(@PathVariable("path") String filename) {
         try (InputStream stream = minioClient.getObject(
                 GetObjectArgs.builder()
                         .bucket("cloud-storage")
@@ -70,18 +71,35 @@ public class FileController {
 
 
 
-    @GetMapping("/file")
-    public List<String> getFiles() throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+    @GetMapping("/file") // get all files from bucket
+    public List<UserFileDto> getFiles() throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
         Iterable<Result<Item>> results = minioClient.listObjects(
                 ListObjectsArgs.builder()
                         .bucket("cloud-storage")
                         .build());
 
-        List<String> files = new ArrayList<>();
+        List<UserFileDto> files = new ArrayList<>();
         for (Result<Item> result : results) {
             Item item = result.get();
-            files.add(item.objectName());
+            files.add(new UserFileDto(item.objectName(), "http://localhost:8080/file/"+item.objectName().replace(" ", "%20"))); // Говно переделывать
         }
         return files;
+    }
+    @GetMapping("/folder") // Get all files from folder
+    public List<UserFileDto> goida() throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+        String folder = "kviak/";
+
+        Iterable<Result<Item>> results = minioClient.listObjects(
+                ListObjectsArgs.builder()
+                        .bucket("cloud-storage")
+                        .prefix(folder)
+                        .build());
+        // Перебираем объекты и обрабатываем их
+        System.out.println("We are in prefix folder.");
+        for (Result<Item> result : results) {
+            Item item = result.get();
+            System.out.println("Имя файла: " + item.objectName());
+        }
+        return null;
     }
 }
