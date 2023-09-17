@@ -69,8 +69,6 @@ public class FileController {
         }
     }
 
-
-
     @GetMapping("/file") // get all files from bucket
     public List<UserFileDto> getFiles() throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
         Iterable<Result<Item>> results = minioClient.listObjects(
@@ -85,7 +83,7 @@ public class FileController {
         }
         return files;
     }
-    @GetMapping("/folder") // Get all files from folder
+    @GetMapping("/folder") // Get all files from folder kviak/
     public List<UserFileDto> goida() throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
         String folder = "kviak/";
 

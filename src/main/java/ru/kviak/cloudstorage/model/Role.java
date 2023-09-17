@@ -2,19 +2,16 @@ package ru.kviak.cloudstorage.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import java.util.List;
 
 @Entity
-@Table(name = "roles")
 @Data
-@EntityListeners(AuditingEntityListener.class)
-public class Role extends BaseEntity {
+@Table(name = "roles")
+public class Role {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    private Integer id;
 
     @Column(name = "name")
     private String name;
-
-    @ManyToMany(mappedBy = "roles", fetch = FetchType.LAZY)
-    private List<User> users;
 }
