@@ -3,6 +3,7 @@ package ru.kviak.cloudstorage.controller;
 import io.minio.*;
 import io.minio.errors.*;
 import io.minio.messages.Item;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.compress.utils.IOUtils;
 import org.springframework.core.io.ByteArrayResource;
@@ -14,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.kviak.cloudstorage.dto.UserFileDto;
+import ru.kviak.cloudstorage.util.JwtTokenUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,6 +29,7 @@ import java.util.List;
 public class FileController {
 
     private final MinioClient minioClient;
+    private final JwtTokenUtils jwtTokenUtils;
 
     @PostMapping("/file") // add file to bucket
     public String uploadFile(@RequestParam("file") MultipartFile file) {
@@ -70,7 +73,13 @@ public class FileController {
     }
 
     @GetMapping("/file") // get all files from bucket
-    public List<UserFileDto> getFiles() throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+    public List<UserFileDto> getFiles(HttpServletRequest request) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+
+
+        String token = request.getHeader(HttpHeaders.AUTHORIZATION).substring(7);
+        System.out.println(token);
+        System.out.println(jwtTokenUtils.getUsername(token));
+
         Iterable<Result<Item>> results = minioClient.listObjects(
                 ListObjectsArgs.builder()
                         .bucket("cloud-storage")
