@@ -2,6 +2,7 @@ package ru.kviak.cloudstorage.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.kviak.cloudstorage.model.Role;
 import ru.kviak.cloudstorage.repository.RoleRepository;
 
@@ -10,7 +11,8 @@ import ru.kviak.cloudstorage.repository.RoleRepository;
 public class RoleService {
     private final RoleRepository roleRepository;
 
+    @Transactional
     public Role getUserRole() {
-        return roleRepository.findByName("ROLE_USER").get();
+        return roleRepository.findByName("USER_ROLE").get();
     }
 }

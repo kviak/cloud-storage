@@ -8,6 +8,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 import ru.kviak.cloudstorage.dto.JwtRequest;
 import ru.kviak.cloudstorage.dto.JwtResponse;
@@ -45,7 +46,6 @@ public class AuthService {
         User user = userService.createNewUser(registrationUserDto);
         return ResponseEntity.ok(new UserDto(user.getId(), user.getUsername(), user.getEmail()));
     }
-
     public boolean activateUser(String code) {
         return userService.activateUser(code);
     }

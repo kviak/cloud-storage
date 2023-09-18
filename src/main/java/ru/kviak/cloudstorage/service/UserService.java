@@ -36,13 +36,14 @@ public class UserService implements UserDetailsService {
         User user = findByUsername(username).orElseThrow(() -> new UsernameNotFoundException(
                 String.format("Пользователь '%s' не найден", username)
         ));
+        if (!user.isActivated()) throw new UsernameNotFoundException("This account not activated please check you email and confirm email!");
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(),
                 user.getPassword(),
                 user.getRoles().stream().map(role -> new SimpleGrantedAuthority(role.getName())).collect(Collectors.toList())
         );
     }
-
+    @Transactional
     public User createNewUser(RegistrationUserDto registrationUserDto) {
         User user = new User();
         user.setUsername(registrationUserDto.getUsername());
@@ -57,10 +58,17 @@ public class UserService implements UserDetailsService {
         }
         return userRepository.save(user);
     }
-
+    @Transactional
     public boolean activateUser(String code) {
         Optional<User> user = userRepository.findByActivationCode(code);
-        System.out.println(user.orElse(null));
-        return user.isPresent();
+        if (user.isPresent()) {
+            if (user.get().isActivated()) return false;
+            else {
+                User user1 = user.get();
+                user1.setActivated(true);
+                return true;
+            }
+        }
+        return false;
     }
 }

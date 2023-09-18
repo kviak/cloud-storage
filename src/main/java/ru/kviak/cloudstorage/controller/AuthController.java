@@ -14,10 +14,8 @@ public class AuthController {
 
     @PostMapping("/auth")
     public ResponseEntity<?> createAuthToken(@RequestBody JwtRequest authRequest) {
-        System.out.println("GOIDA");
         return authService.createAuthToken(authRequest);
     }
-
     @PostMapping("/registration")
     public ResponseEntity<?> createNewUser(@RequestBody RegistrationUserDto registrationUserDto) {
         return authService.createNewUser(registrationUserDto);
@@ -27,6 +25,6 @@ public class AuthController {
     public String activate(@PathVariable String code){
         boolean isActivated = authService.activateUser(code);
         if (isActivated) return "Account success activate";
-            else return "Invalid";
+            else return "Invalid link or account already activated!";
     }
 }

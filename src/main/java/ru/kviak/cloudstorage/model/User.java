@@ -26,6 +26,9 @@ public class User {
     @Column(name = "activation_code")
     private String activationCode;
 
+    @Column(name = "activated")
+    private boolean activated;
+
     @ManyToMany
     @JoinTable(
             name = "users_roles",
