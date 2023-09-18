@@ -2,9 +2,7 @@ package ru.kviak.cloudstorage.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ru.kviak.cloudstorage.dto.JwtRequest;
 import ru.kviak.cloudstorage.dto.RegistrationUserDto;
 import ru.kviak.cloudstorage.service.AuthService;
@@ -23,5 +21,12 @@ public class AuthController {
     @PostMapping("/registration")
     public ResponseEntity<?> createNewUser(@RequestBody RegistrationUserDto registrationUserDto) {
         return authService.createNewUser(registrationUserDto);
+    }
+
+    @GetMapping("/activate/{code}")
+    public String activate(@PathVariable String code){
+        boolean isActivated = authService.activateUser(code);
+        if (isActivated) return "Account success activate";
+            else return "Invalid";
     }
 }

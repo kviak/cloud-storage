@@ -45,4 +45,8 @@ public class AuthService {
         User user = userService.createNewUser(registrationUserDto);
         return ResponseEntity.ok(new UserDto(user.getId(), user.getUsername(), user.getEmail()));
     }
+
+    public boolean activateUser(String code) {
+        return userService.activateUser(code);
+    }
 }

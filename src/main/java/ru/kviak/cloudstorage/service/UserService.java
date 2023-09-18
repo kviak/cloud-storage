@@ -1,7 +1,7 @@
 package ru.kviak.cloudstorage.service;
 
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -15,28 +15,16 @@ import ru.kviak.cloudstorage.repository.UserRepository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class UserService implements UserDetailsService {
-    private UserRepository userRepository;
-    private RoleService roleService;
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    public void setUserRepository(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
-
-    @Autowired
-    public void setRoleService(RoleService roleService) {
-        this.roleService = roleService;
-    }
-
-    @Autowired
-    public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
-        this.passwordEncoder = passwordEncoder;
-    }
+    private final UserRepository userRepository;
+    private final RoleService roleService;
+    private final PasswordEncoder passwordEncoder;
+    private final EmailSenderService mailSender;
 
     public Optional<User> findByUsername(String username) {
         return userRepository.findByUsername(username);
@@ -61,6 +49,18 @@ public class UserService implements UserDetailsService {
         user.setEmail(registrationUserDto.getEmail());
         user.setPassword(passwordEncoder.encode(registrationUserDto.getPassword()));
         user.setRoles(List.of(roleService.getUserRole()));
+        user.setActivationCode(UUID.randomUUID().toString());
+
+        if (!user.getEmail().isBlank()){
+            String message = "http:/localhost:8080/activate/"+user.getActivationCode();
+            mailSender.send(user.getEmail(), "Activation code: ", message);
+        }
         return userRepository.save(user);
+    }
+
+    public boolean activateUser(String code) {
+        Optional<User> user = userRepository.findByActivationCode(code);
+        System.out.println(user.orElse(null));
+        return user.isPresent();
     }
 }
