@@ -28,12 +28,18 @@ public class FileController {
     public ResponseEntity<Resource> downloadFile(@PathVariable("path") String fileName, HttpServletRequest request) {
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType("application/octet-stream"))
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName)
                 .body(fileMinioService.getFile(fileMinioService.getToken(request), fileName));
     }
 
     @GetMapping("/file")
     public ResponseEntity<List<UserFileDto>> getFiles(HttpServletRequest request){
         return ResponseEntity.ok(fileMinioService.getAllUserFile(fileMinioService.getToken(request)));
+    }
+
+    @DeleteMapping("/file/{path:.+}")
+    public ResponseEntity<?> deleteFile(@PathVariable("path") String fileName, HttpServletRequest request) {
+        if (fileMinioService.deleteFile(fileMinioService.getToken(request), fileName)) return ResponseEntity.ok("File removed!");
+            else return ResponseEntity.badRequest().body("File not found!");
     }
 }

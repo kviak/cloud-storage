@@ -1,6 +1,7 @@
 package ru.kviak.cloudstorage.service;
 
 import io.minio.*;
+import io.minio.messages.DeleteObject;
 import io.minio.messages.Item;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.kviak.cloudstorage.dto.UserFileDto;
+import ru.kviak.cloudstorage.exception.FileNotFoundException;
 import ru.kviak.cloudstorage.exception.MinioNotFoundException;
 import ru.kviak.cloudstorage.util.JwtTokenUtils;
 
@@ -94,11 +96,25 @@ public class FileMinioService {
             return new ByteArrayResource(data);
         } catch (Exception e) {
             e.printStackTrace();
-            return null;
+            throw new FileNotFoundException("File not found exception!");
         }
     }
 
     public String getToken(HttpServletRequest request){
         return request.getHeader(HttpHeaders.AUTHORIZATION).substring(7);
+    }
+
+    public boolean deleteFile(String token, String fileName) {
+        String folder = userService.findByUsername(jwtTokenUtils.getUsername(token)).get().getEmail() + "/";
+        try {
+            minioClient.removeObject(
+                    RemoveObjectArgs.builder()
+                            .bucket("cloud-storage")
+                            .object(folder + fileName)
+                            .build());
+        } catch (Exception e){
+            return false;
+        }
+        return true;
     }
 }
