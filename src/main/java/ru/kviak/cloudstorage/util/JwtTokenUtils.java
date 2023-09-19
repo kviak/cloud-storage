@@ -3,7 +3,9 @@ package ru.kviak.cloudstorage.util;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -15,12 +17,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Getter
+@Setter
 @Component
+@ConfigurationProperties(prefix = "jwt-token")
 public class JwtTokenUtils {
-    @Value("${jwt.token.secret}")
     private String secret;
-
-    @Value("${jwt.token.expired}")
     private Duration jwtLifetime;
 
     public String generateToken(UserDetails userDetails) {

@@ -14,7 +14,7 @@ import ru.kviak.cloudstorage.dto.JwtRequest;
 import ru.kviak.cloudstorage.dto.JwtResponse;
 import ru.kviak.cloudstorage.dto.RegistrationUserDto;
 import ru.kviak.cloudstorage.dto.UserDto;
-import ru.kviak.cloudstorage.exceptions.AppError;
+import ru.kviak.cloudstorage.exception.AppError;
 import ru.kviak.cloudstorage.model.User;
 import ru.kviak.cloudstorage.util.JwtTokenUtils;
 
@@ -50,7 +50,7 @@ public class AuthService {
         fileMinioService.createFolderForNewUser(user.getEmail(), user.getUsername());
         return ResponseEntity.ok(new UserDto(user.getId(), user.getUsername(), user.getEmail()));
     }
-    public boolean activateUser(String code) {
-        return userService.activateUser(code);
+    public void activateUser(String code) {
+        userService.activateUser(code);
     }
 }

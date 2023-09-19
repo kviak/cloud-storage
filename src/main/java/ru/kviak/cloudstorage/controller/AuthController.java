@@ -22,9 +22,8 @@ public class AuthController {
     }
 
     @GetMapping("/activate/{code}")
-    public String activate(@PathVariable String code){
-        boolean isActivated = authService.activateUser(code);
-        if (isActivated) return "Account success activate";
-            else return "Invalid link or account already activated!";
+    public ResponseEntity<?> activate(@PathVariable String code){
+        authService.activateUser(code);
+        return ResponseEntity.ok("Account activated!");
     }
 }
