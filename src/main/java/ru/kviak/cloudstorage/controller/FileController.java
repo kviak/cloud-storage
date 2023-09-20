@@ -42,4 +42,9 @@ public class FileController {
         if (fileMinioService.deleteFile(fileMinioService.getToken(request), fileName)) return ResponseEntity.ok("File removed!");
             else return ResponseEntity.badRequest().body("File not found!");
     }
+
+    @GetMapping("/admin/file")
+    public ResponseEntity<List<List<UserFileDto>>> getFileFromAllUser(){
+        return ResponseEntity.ok(fileMinioService.getAllUsersFiles());
+    }
 }

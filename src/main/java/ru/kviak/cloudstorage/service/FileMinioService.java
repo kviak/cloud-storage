@@ -1,7 +1,6 @@
 package ru.kviak.cloudstorage.service;
 
 import io.minio.*;
-import io.minio.messages.DeleteObject;
 import io.minio.messages.Item;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -85,7 +84,7 @@ public class FileMinioService {
     }
 
     public Resource getFile(String token, String fileName) {
-        String folder =userService.findByUsername(jwtTokenUtils.getUsername(token)).get().getEmail() + "/";
+        String folder = userService.findByUsername(jwtTokenUtils.getUsername(token)).get().getEmail() + "/";
 
         try (InputStream stream = minioClient.getObject(
                 GetObjectArgs.builder()
@@ -116,5 +115,29 @@ public class FileMinioService {
             return false;
         }
         return true;
+    }
+
+    public List<List<UserFileDto>> getAllUsersFiles() {
+        List<List<UserFileDto>> allFileList = new ArrayList<>();
+
+        userService.getAllUsers().forEach(userDto -> {
+            allFileList.add(getAllFiles(userDto.getEmail()));
+        });
+        return allFileList;
+    }
+
+    @SneakyThrows
+    private List<UserFileDto> getAllFiles(String email) {
+        Iterable<Result<Item>> results = minioClient.listObjects(
+                ListObjectsArgs.builder()
+                        .bucket("cloud-storage")
+                        .prefix(email + "/")
+                        .build());
+        List<UserFileDto> files = new ArrayList<>();
+        for (Result<Item> result : results) {
+            Item item = result.get();
+            files.add(new UserFileDto(item.objectName().replace(email + "/", ""), url+"file/"+item.objectName().replace(" ", "%20").replace(email + "/", "")));
+        }
+        return files;
     }
 }

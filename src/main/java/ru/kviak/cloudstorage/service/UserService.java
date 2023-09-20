@@ -10,11 +10,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.kviak.cloudstorage.dto.RegistrationUserDto;
+import ru.kviak.cloudstorage.dto.UserDto;
 import ru.kviak.cloudstorage.exception.UserAlreadyActivatedException;
 import ru.kviak.cloudstorage.exception.UserNotFoundException;
 import ru.kviak.cloudstorage.model.User;
 import ru.kviak.cloudstorage.repository.UserRepository;
+import ru.kviak.cloudstorage.util.mapper.UserMapper;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -68,5 +71,14 @@ public class UserService implements UserDetailsService {
         if (user.isActivated()) throw new UserAlreadyActivatedException();
             else { user.setActivated(true);
         }
+    }
+
+    public List<UserDto> getAllUsers(){
+        List<UserDto> list = new ArrayList<>();
+        userRepository.getUserByActivatedTrue().orElseThrow(UserNotFoundException::new)
+        .forEach(user -> {
+            list.add(UserMapper.INSTANCE.mapTo(user));
+        });
+        return list;
     }
 }

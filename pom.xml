@@ -17,6 +17,7 @@
         <java.version>17</java.version>
         <io-minio.version>8.5.5</io-minio.version>
         <io-jwt.version>0.11.5</io-jwt.version>
+        <org-mapstruct.version>1.5.5.Final</org-mapstruct.version>
     </properties>
     <dependencies>
         <dependency>
@@ -86,6 +87,16 @@
             <groupId>io.minio</groupId>
             <artifactId>minio</artifactId>
             <version>${io-minio.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct</artifactId>
+            <version>${org-mapstruct.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct-processor</artifactId>
+            <version>${org-mapstruct.version}</version>
         </dependency>
     </dependencies>
 
