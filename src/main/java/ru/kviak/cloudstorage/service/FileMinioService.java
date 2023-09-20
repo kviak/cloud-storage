@@ -15,7 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.kviak.cloudstorage.dto.UserFileDto;
 import ru.kviak.cloudstorage.exception.FileNotFoundException;
 import ru.kviak.cloudstorage.exception.MinioNotFoundException;
-import ru.kviak.cloudstorage.util.JwtTokenUtils;
+import ru.kviak.cloudstorage.util.jwt.JwtTokenUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;

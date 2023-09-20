@@ -1,4 +1,4 @@
-package ru.kviak.cloudstorage.exception;
+package ru.kviak.cloudstorage.exception.error;
 
 import lombok.Data;
 

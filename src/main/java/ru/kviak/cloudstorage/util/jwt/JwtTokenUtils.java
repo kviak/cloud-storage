@@ -1,4 +1,4 @@
-package ru.kviak.cloudstorage.util;
+package ru.kviak.cloudstorage.util.jwt;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

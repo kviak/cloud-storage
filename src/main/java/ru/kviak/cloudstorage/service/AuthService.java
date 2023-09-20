@@ -14,9 +14,9 @@ import ru.kviak.cloudstorage.dto.JwtRequest;
 import ru.kviak.cloudstorage.dto.JwtResponse;
 import ru.kviak.cloudstorage.dto.RegistrationUserDto;
 import ru.kviak.cloudstorage.dto.UserDto;
-import ru.kviak.cloudstorage.exception.AppError;
+import ru.kviak.cloudstorage.exception.error.AppError;
 import ru.kviak.cloudstorage.model.User;
-import ru.kviak.cloudstorage.util.JwtTokenUtils;
+import ru.kviak.cloudstorage.util.jwt.JwtTokenUtils;
 
 @Service
 @RequiredArgsConstructor
