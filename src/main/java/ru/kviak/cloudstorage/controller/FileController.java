@@ -44,7 +44,8 @@ public class FileController {
     }
 
     @GetMapping("/admin/file")
-    public ResponseEntity<List<List<UserFileDto>>> getFileFromAllUser(){
-        return ResponseEntity.ok(fileMinioService.getAllUsersFiles());
+    public ResponseEntity<List<List<UserFileDto>>> getFileFromAllUser( @RequestParam(defaultValue = "0",name = "offset") int offset, // Пагинация по пользователям.
+                                                                       @RequestParam (defaultValue = "100",name ="limit") int limit){
+        return ResponseEntity.ok(fileMinioService.getAllUsersFiles(offset, limit));
     }
 }

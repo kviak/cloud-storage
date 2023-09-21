@@ -127,13 +127,13 @@ public class FileMinioService {
         return true;
     }
 
-    public List<List<UserFileDto>> getAllUsersFiles() {
+    public List<List<UserFileDto>> getAllUsersFiles(int offset, int limit) {
         List<List<UserFileDto>> allFileList = new ArrayList<>();
 
-        userService.getAllUsers().forEach(userDto -> {
+        userService.getAllUsers(offset, limit).forEach(userDto -> {
             allFileList.add(getAllFiles(userDto.getEmail()));
         });
-        return allFileList;
+        return allFileList; // Пагинация только по пользователям, по файлам можно сделать, но она будет говна.
     }
 
     @SneakyThrows

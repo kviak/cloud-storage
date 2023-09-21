@@ -2,6 +2,7 @@ package ru.kviak.cloudstorage.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -15,7 +16,7 @@ import ru.kviak.cloudstorage.exception.UserAlreadyActivatedException;
 import ru.kviak.cloudstorage.exception.UserNotFoundException;
 import ru.kviak.cloudstorage.model.User;
 import ru.kviak.cloudstorage.repository.UserRepository;
-import ru.kviak.cloudstorage.util.mapper.UserMapper;
+import ru.kviak.cloudstorage.mapper.UserMapper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +30,8 @@ public class UserService implements UserDetailsService {
     private final RoleService roleService;
     private final PasswordEncoder passwordEncoder;
     private final EmailSenderService mailSender;
+    private final UserMapper userMapper;
+
     @Value("${application.url}")
     private String url;
 
@@ -50,10 +53,9 @@ public class UserService implements UserDetailsService {
     }
     @Transactional
     public User createNewUser(RegistrationUserDto registrationUserDto) {
-        User user = UserMapper.INSTANCE.mapTo(registrationUserDto,
+        User user = userMapper.mapTo(registrationUserDto,
                 passwordEncoder.encode(registrationUserDto.getPassword()),
                 List.of(roleService.getUserRole()));
-
         if (!user.getEmail().isBlank()){
             String message = url + "activate/"+user.getActivationCode();
             mailSender.send(user.getEmail(), "Activation code: ", message);
@@ -69,11 +71,11 @@ public class UserService implements UserDetailsService {
             }
     }
 
-    public List<UserDto> getAllUsers(){
+    public List<UserDto> getAllUsers(int offset, int limit){
         List<UserDto> list = new ArrayList<>();
-        userRepository.getUserByActivatedTrue().orElseThrow(UserNotFoundException::new)
-        .forEach(user -> {
-            list.add(UserMapper.INSTANCE.mapTo(user));
+        userRepository.findAll(PageRequest.of(offset, limit))
+                .forEach(user -> {
+            list.add(userMapper.mapTo(user));
         });
         return list;
     }
