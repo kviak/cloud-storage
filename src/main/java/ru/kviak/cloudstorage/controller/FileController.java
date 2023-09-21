@@ -20,11 +20,11 @@ public class FileController {
     private final FileMinioService fileMinioService;
 
     @PostMapping("/file")
-    public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file, HttpServletRequest request) {
-        return ResponseEntity.ok(fileMinioService.uploadUserFile(fileMinioService.getToken(request), file));
+    public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile[] files, HttpServletRequest request) {
+        return ResponseEntity.ok(fileMinioService.uploadUserFile(fileMinioService.getToken(request), files));
     }
 
-    @GetMapping("/file/{path:.+}")
+    @GetMapping("/file/{path}")
     public ResponseEntity<Resource> downloadFile(@PathVariable("path") String fileName, HttpServletRequest request) {
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType("application/octet-stream"))

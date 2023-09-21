@@ -20,7 +20,6 @@ import ru.kviak.cloudstorage.util.mapper.UserMapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -51,12 +50,9 @@ public class UserService implements UserDetailsService {
     }
     @Transactional
     public User createNewUser(RegistrationUserDto registrationUserDto) {
-        User user = new User();
-        user.setUsername(registrationUserDto.getUsername());
-        user.setEmail(registrationUserDto.getEmail());
-        user.setPassword(passwordEncoder.encode(registrationUserDto.getPassword())); // TODO: MapStruct напрашивается.
-        user.setRoles(List.of(roleService.getUserRole()));
-        user.setActivationCode(UUID.randomUUID().toString());
+        User user = UserMapper.INSTANCE.mapTo(registrationUserDto,
+                passwordEncoder.encode(registrationUserDto.getPassword()),
+                List.of(roleService.getUserRole()));
 
         if (!user.getEmail().isBlank()){
             String message = url + "activate/"+user.getActivationCode();
@@ -66,11 +62,11 @@ public class UserService implements UserDetailsService {
     }
     @Transactional
     public void activateUser(String code) {
-        User user = userRepository.findByActivationCode(code)
-                .orElseThrow(UserNotFoundException::new);
+        User user = userRepository.findByActivationCode(code).orElseThrow(UserNotFoundException::new);
         if (user.isActivated()) throw new UserAlreadyActivatedException();
-            else { user.setActivated(true);
-        }
+            else {
+                user.setActivated(true);
+            }
     }
 
     public List<UserDto> getAllUsers(){

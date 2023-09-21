@@ -34,10 +34,12 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
                 new AppError(404, "User not found!"));
     }
 
-    @ExceptionHandler(value =  SizeLimitExceededException.class)
+    @ExceptionHandler(value =  {FileSizeExceedException.class, SizeLimitExceededException.class})
     protected ResponseEntity<?> sizeLimitExceedException() {
         return ResponseEntity.badRequest().body(
-                new AppError(413, "The maximum file size is exceeded!\n" +
-                                                 "The maximum for regular user, size is 10 MB"));
+                new AppError(413, """
+                        The maximum file size is exceeded!
+                        The maximum for regular user, size is 10 MB
+                        The maximum for vip user, size is 20 MB"""));
     }
 }
