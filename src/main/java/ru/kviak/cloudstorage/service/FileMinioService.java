@@ -48,9 +48,10 @@ public class FileMinioService {
         }
     }
 
-    public String uploadUserFile(String token, MultipartFile[] files) {
+    public String uploadUserFile(HttpServletRequest request, MultipartFile[] files) {
+        String token = this.getToken(request);
         String userDirectory = userService.findByUsername(jwtTokenUtils.getUsername(token)).get().getEmail() + "/";
-        boolean isVip = jwtTokenUtils.getRoles(token).contains("ROLE_VIP");;
+        boolean isVip = jwtTokenUtils.getRoles(token).contains("ROLE_VIP");
 
         try {
             for (MultipartFile file : files) {
@@ -76,8 +77,8 @@ public class FileMinioService {
         }
     }
 
-    public Resource getFile(String token, String fileName) {
-        String folder = userService.findByUsername(jwtTokenUtils.getUsername(token)).get().getEmail() + "/";
+    public Resource getFile(HttpServletRequest request, String fileName) {
+        String folder = userService.findByUsername(jwtTokenUtils.getUsername(getToken(request))).get().getEmail() + "/";
 
         try (InputStream stream = minioClient.getObject(
                 GetObjectArgs.builder()
@@ -110,8 +111,8 @@ public class FileMinioService {
         return true;
     }
 
-    public List<UserFileDto> getUserFiles(String token) {
-        String username = jwtTokenUtils.getUsername(token);
+    public List<UserFileDto> getUserFiles(HttpServletRequest request) {
+        String username = jwtTokenUtils.getUsername(getToken(request));
         return getAllUserFiles(userService.findByUsername(username).get().getEmail());
     }
 
