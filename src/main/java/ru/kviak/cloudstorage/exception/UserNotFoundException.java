@@ -1,8 +1,8 @@
 package ru.kviak.cloudstorage.exception;
 
-import lombok.Data;
+import lombok.experimental.StandardException;
 
-@Data
+@StandardException
 public class UserNotFoundException extends RuntimeException{
-    String message;
+    private String message;
 }

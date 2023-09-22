@@ -34,18 +34,17 @@ public class FileController {
 
     @GetMapping("/file")
     public ResponseEntity<List<UserFileDto>> getFiles(HttpServletRequest request){
-        return ResponseEntity.ok(fileMinioService.getAllUserFile(fileMinioService.getToken(request)));
+        return ResponseEntity.ok(fileMinioService.getUserFiles(fileMinioService.getToken(request)));
     }
 
-    @DeleteMapping("/file/{path:.+}")
+    @DeleteMapping("/file/{path}")
     public ResponseEntity<?> deleteFile(@PathVariable("path") String fileName, HttpServletRequest request) {
-        if (fileMinioService.deleteFile(fileMinioService.getToken(request), fileName)) return ResponseEntity.ok("File removed!");
+        if (fileMinioService.deleteFile(request, fileName)) return ResponseEntity.ok("File removed!");
             else return ResponseEntity.badRequest().body("File not found!");
     }
 
-    @GetMapping("/admin/file")
-    public ResponseEntity<List<List<UserFileDto>>> getFileFromAllUser( @RequestParam(defaultValue = "0",name = "offset") int offset, // Пагинация по пользователям.
-                                                                       @RequestParam (defaultValue = "100",name ="limit") int limit){
-        return ResponseEntity.ok(fileMinioService.getAllUsersFiles(offset, limit));
+    @GetMapping("/admin/{username}")
+    public ResponseEntity<List<UserFileDto>> getUserFileAdmin(@PathVariable("username") String username){
+        return ResponseEntity.ok(fileMinioService.getUserFilesAdmin(username));
     }
 }

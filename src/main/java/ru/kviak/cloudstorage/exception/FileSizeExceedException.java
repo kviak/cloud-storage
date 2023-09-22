@@ -1,8 +1,8 @@
 package ru.kviak.cloudstorage.exception;
 
-import lombok.AllArgsConstructor;
+import lombok.experimental.StandardException;
 
-@AllArgsConstructor
+@StandardException
 public class FileSizeExceedException extends RuntimeException{
-    String message;
+    private String message;
 }
