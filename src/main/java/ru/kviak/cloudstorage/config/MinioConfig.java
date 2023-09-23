@@ -27,4 +27,5 @@ public class MinioConfig {
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
 }
