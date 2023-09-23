@@ -11,6 +11,7 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.multipart.MultipartFile;
 import ru.kviak.cloudstorage.dto.UserFileDto;
 import ru.kviak.cloudstorage.exception.FileNotFoundException;
@@ -23,9 +24,11 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:4200")
 public class FileMinioService {
     private final MinioClient minioClient;
     private final JwtTokenUtils jwtTokenUtils;
@@ -50,6 +53,7 @@ public class FileMinioService {
 
     public String uploadUserFile(HttpServletRequest request, MultipartFile[] files) {
         String token = this.getToken(request);
+
         String userDirectory = userService.findByUsername(jwtTokenUtils.getUsername(token)).get().getEmail() + "/";
         boolean isVip = jwtTokenUtils.getRoles(token).contains("ROLE_VIP");
 
@@ -113,7 +117,9 @@ public class FileMinioService {
 
     public List<UserFileDto> getUserFiles(HttpServletRequest request) {
         String username = jwtTokenUtils.getUsername(getToken(request));
-        return getAllUserFiles(userService.findByUsername(username).get().getEmail());
+        return getAllUserFiles(userService.findByUsername(username).get().getEmail()).stream()
+                .filter(file -> !file.getFileName().endsWith("/"))
+                .collect(Collectors.toList());
     }
 
     public List<UserFileDto> getUserFilesAdmin(String username) {

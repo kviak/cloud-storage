@@ -9,6 +9,7 @@ import ru.kviak.cloudstorage.service.AuthService;
 
 @RestController
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
 public class AuthController {
     private final AuthService authService;
 
