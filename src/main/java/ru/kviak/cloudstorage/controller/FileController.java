@@ -2,6 +2,7 @@ package ru.kviak.cloudstorage.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -27,10 +28,12 @@ public class FileController {
 
     @GetMapping("/file/{path}")
     public ResponseEntity<Resource> downloadFile(@PathVariable("path") String fileName, HttpServletRequest request) {
+        ByteArrayResource file = fileMinioService.getFile(request, fileName);
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType("application/octet-stream"))
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName)
-                .body(fileMinioService.getFile(request, fileName));
+                .body(file);
+
     }
 
     @GetMapping("/file")

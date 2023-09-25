@@ -21,6 +21,7 @@ import ru.kviak.cloudstorage.exception.UserNotFoundException;
 import ru.kviak.cloudstorage.util.jwt.JwtTokenUtils;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -81,7 +82,7 @@ public class FileMinioService {
         }
     }
 
-    public Resource getFile(HttpServletRequest request, String fileName) {
+    public ByteArrayResource getFile(HttpServletRequest request, String fileName) {
         String folder = userService.findByUsername(jwtTokenUtils.getUsername(getToken(request))).get().getEmail() + "/";
 
         try (InputStream stream = minioClient.getObject(

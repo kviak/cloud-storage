@@ -2,9 +2,9 @@ services:
   postgres:
     image: 'postgres:latest'
     environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
     ports:
       - '5432:5432'
 
@@ -12,12 +12,34 @@ services:
     image: minio/minio
     command: server --console-address ":9001" /data
     volumes:
-      - D:\minio\data:/data
+      - ~\minio\data:/data
     environment:
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
-      MINIO_ROOT_ACCESS_KEY: ${MINIO_ACCESS_KEY}
-      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+      MINIO_ROOT_USER: ROOTUSER
+      MINIO_ROOT_PASSWORD: 14g9flbf
     ports:
       - "9000:9000"
       - "9001:9001"
+
+  client-backend:
+    image: client:0.0.1
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - minio
+      - postgres
+    environment:
+      - SERVER_PORT= 8080
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres/db
+      - MINIO_CLIENT_ENDPOINT=http://minio:9000
+      - MINIO_CLIENT_USER=ROOTUSER
+      - MINIO_CLIENT_PASSWORD=14g9flbf
+
+  createbuckets:
+    image: minio/mc
+    depends_on:
+      - minio
+    entrypoint:
+      sh -c "mc alias set myminio http://minio:9000 ROOTUSER 14g9flbf && mc mb myminio/cloud-storage && mc policy set download myminio/cloud-storage"
