@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: 'postgres:latest'
+    image: kviak/kviak-repo:postgres
     environment:
       POSTGRES_DB: db
       POSTGRES_USER: postgres
@@ -9,7 +9,7 @@ services:
       - '5432:5432'
 
   minio:
-    image: minio/minio
+    image: kviak/kviak-repo:minio
     command: server --console-address ":9001" /data
     volumes:
       - ~\minio\data:/data
@@ -21,10 +21,7 @@ services:
       - "9001:9001"
 
   client-backend:
-    image: client:0.0.1
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: kviak/kviak-repo:code
     ports:
       - "8080:8080"
     depends_on:
@@ -40,7 +37,7 @@ services:
       - MINIO_SECRET_KEY=14g9flbf
 
   createbuckets:
-    image: minio/mc
+    image: kviak/kviak-repo:mc
     depends_on:
       - minio
     entrypoint:
