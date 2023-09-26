@@ -10,6 +10,7 @@ services:
 
   minio:
     image: kviak/kviak-repo:minio
+
     command: server --console-address ":9001" /data
     volumes:
       - ~\minio
@@ -35,10 +36,3 @@ services:
       - MINIO_ROOT_PASSWORD=14g9flbf
       - MINIO_ACCESS_KEY=ROOTUSER
       - MINIO_SECRET_KEY=14g9flbf
-
-  createbuckets:
-    image: kviak/kviak-repo:mc
-    depends_on:
-      - minio
-    entrypoint:
-      sh -c "mc alias set myminio http://minio:9000 ROOTUSER 14g9flbf && mc mb myminio/cloud-storage && mc policy set download myminio/cloud-storage"
