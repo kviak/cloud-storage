@@ -16,7 +16,6 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://5.53.125.46:4200", allowCredentials = "true")
 public class FileController {
 
     private final FileMinioService fileMinioService;
