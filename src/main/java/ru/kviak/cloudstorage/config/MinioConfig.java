@@ -13,14 +13,14 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 @Configuration
 @ConfigurationProperties("minio")
 public class MinioConfig {
-    private String accessKey;
-    private String secretKey;
+    private String user;
+    private String password;
     private String endPoint;
     @Bean
     public MinioClient minioClient(){
         return MinioClient.builder()
                 .endpoint(endPoint)
-                .credentials(accessKey, secretKey)
+                .credentials(user, password)
                 .build();
     }
     @Bean
