@@ -21,7 +21,7 @@ public class EmailSenderService {
         mailMessage.setFrom(username);
         mailMessage.setTo(emailTo);
         mailMessage.setSubject(subject);
-        mailMessage.setText(message);
+        mailMessage.setText("Activation link for Cloud-Storage-Kviak: \n" + message);
 
         mailSender.send(mailMessage);
     }

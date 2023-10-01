@@ -9,6 +9,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import ru.kviak.cloudstorage.dto.FolderDto;
 import ru.kviak.cloudstorage.dto.UserFileDto;
 import ru.kviak.cloudstorage.service.FileMinioService;
 
@@ -49,5 +50,21 @@ public class FileController {
     @GetMapping("/admin/{username}")
     public ResponseEntity<List<UserFileDto>> getUserFileAdmin(@PathVariable("username") String username){
         return ResponseEntity.ok(fileMinioService.getUserFilesAdmin(username));
+    }
+
+    @GetMapping("/folder")
+    public ResponseEntity<List<FolderDto>> getUserFolder(HttpServletRequest request){ // Change to folderDto
+        return ResponseEntity.ok(fileMinioService.getUserFolder(request));
+    }
+
+    @DeleteMapping("/folder/{path}")
+    public ResponseEntity<?> deleteFolder(@PathVariable("path") String folderName, HttpServletRequest request) {
+        if (fileMinioService.deleteFolder(request, folderName)) return ResponseEntity.noContent().build();
+        else return ResponseEntity.badRequest().body("Folder not found!");
+    }
+
+    @GetMapping("/folder/{path}")
+    public ResponseEntity<?> getFolderFiles(@PathVariable("path") String folderName, HttpServletRequest request){
+        return ResponseEntity.ok(fileMinioService.getFolder(request, folderName));
     }
 }

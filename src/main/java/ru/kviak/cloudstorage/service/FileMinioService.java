@@ -8,11 +8,10 @@ import lombok.SneakyThrows;
 import org.apache.commons.compress.utils.IOUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.multipart.MultipartFile;
+import ru.kviak.cloudstorage.dto.FolderDto;
 import ru.kviak.cloudstorage.dto.UserFileDto;
 import ru.kviak.cloudstorage.exception.FileNotFoundException;
 import ru.kviak.cloudstorage.exception.FileSizeExceedException;
@@ -21,7 +20,6 @@ import ru.kviak.cloudstorage.exception.UserNotFoundException;
 import ru.kviak.cloudstorage.util.jwt.JwtTokenUtils;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +27,6 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:4200")
 public class FileMinioService {
     private final MinioClient minioClient;
     private final JwtTokenUtils jwtTokenUtils;
@@ -141,5 +138,37 @@ public class FileMinioService {
             files.add(new UserFileDto(item.objectName().replace(email + "/", ""), url+"file/"+item.objectName().replace(" ", "%20").replace(email + "/", "")));
         }
         return files;
+    }
+
+    public List<FolderDto> getUserFolder(HttpServletRequest request) {
+        String username = jwtTokenUtils.getUsername(getToken(request));
+        return getAllUserFiles(userService.findByUsername(username).get().getEmail()).stream()
+                .filter(file -> file.getFileName().endsWith("/"))
+                .map(userFileDto -> {
+                    FolderDto folderDto = new FolderDto();
+                    folderDto.setPackageName(userFileDto.getFileName()); // Например, имя файла может быть именем пакета
+                    folderDto.setPackageLink(userFileDto.getLinkFile()); // Например, ссылка на файл может быть ссылкой на пакет
+                    folderDto.setSize(0); // Здесь устанавливайте размер пакета, если это имеет смысл
+                    return folderDto;
+                })
+                .collect(Collectors.toList());
+    }
+
+    public boolean deleteFolder(HttpServletRequest request, String folderName) {
+        String folder = userService.findByUsername(jwtTokenUtils.getUsername(getToken(request))).get().getEmail() + "/";
+        try {
+            minioClient.removeObject(
+                    RemoveObjectArgs.builder()
+                            .bucket("cloud-storage")
+                            .object(folder + folderName)
+                            .build());
+        } catch (Exception e){
+            return false;
+        }
+        return true;
+    }
+
+    public List<ByteArrayResource> getFolder(HttpServletRequest request, String folderName) {
+        return null;
     }
 }

@@ -1,7 +1,9 @@
 package ru.kviak.cloudstorage.service;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -10,10 +12,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
-import ru.kviak.cloudstorage.dto.JwtRequest;
-import ru.kviak.cloudstorage.dto.JwtResponse;
-import ru.kviak.cloudstorage.dto.RegistrationUserDto;
-import ru.kviak.cloudstorage.dto.UserDto;
+import ru.kviak.cloudstorage.dto.*;
 import ru.kviak.cloudstorage.exception.error.AppError;
 import ru.kviak.cloudstorage.model.User;
 import ru.kviak.cloudstorage.util.jwt.JwtTokenUtils;
@@ -25,6 +24,7 @@ public class AuthService {
     private final JwtTokenUtils jwtTokenUtils;
     private final AuthenticationManager authenticationManager;
     private final FileMinioService fileMinioService;
+
 
 
     public ResponseEntity<?> createAuthToken(@RequestBody JwtRequest authRequest) {
@@ -52,5 +52,13 @@ public class AuthService {
     }
     public void activateUser(String code) {
         userService.activateUser(code);
+    }
+
+    public String getUserInfo(HttpServletRequest request) {
+        return jwtTokenUtils.getUsername(getToken(request));
+    }
+
+    public String getToken(HttpServletRequest request){
+        return request.getHeader(HttpHeaders.AUTHORIZATION).substring(7);
     }
 }
