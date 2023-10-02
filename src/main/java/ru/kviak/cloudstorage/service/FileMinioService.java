@@ -135,7 +135,9 @@ public class FileMinioService {
         List<UserFileDto> files = new ArrayList<>();
         for (Result<Item> result : results) {
             Item item = result.get();
-            files.add(new UserFileDto(item.objectName().replace(email + "/", ""), url+"file/"+item.objectName().replace(" ", "%20").replace(email + "/", "")));
+            files.add(new UserFileDto(item.objectName().replace(email + "/", ""),
+                    url+"file/"+item.objectName().replace(" ", "%20").replace(email + "/", ""),
+                    item.size()));
         }
         return files;
     }
@@ -146,29 +148,30 @@ public class FileMinioService {
                 .filter(file -> file.getFileName().endsWith("/"))
                 .map(userFileDto -> {
                     FolderDto folderDto = new FolderDto();
-                    folderDto.setPackageName(userFileDto.getFileName()); // Например, имя файла может быть именем пакета
-                    folderDto.setPackageLink(userFileDto.getLinkFile()); // Например, ссылка на файл может быть ссылкой на пакет
-                    folderDto.setSize(0); // Здесь устанавливайте размер пакета, если это имеет смысл
+                    folderDto.setPackageName(userFileDto.getFileName());
+                    folderDto.setPackageLink(userFileDto.getLinkFile());
+                    folderDto.setSize(0);
                     return folderDto;
                 })
                 .collect(Collectors.toList());
     }
 
     public boolean deleteFolder(HttpServletRequest request, String folderName) {
-        String folder = userService.findByUsername(jwtTokenUtils.getUsername(getToken(request))).get().getEmail() + "/";
-        try {
-            minioClient.removeObject(
-                    RemoveObjectArgs.builder()
-                            .bucket("cloud-storage")
-                            .object(folder + folderName)
-                            .build());
-        } catch (Exception e){
-            return false;
-        }
+//        String folder = userService.findByUsername(jwtTokenUtils.getUsername(getToken(request))).get().getEmail() + "/";
+//        try {
+//            minioClient.deleteObjectTags();
+//                    removeObject(
+//                    RemoveObjectArgs.builder()
+//                            .bucket("cloud-storage")
+//                            .object(folder + folderName) // REWORK
+//                            .build());
+//        } catch (Exception e){
+//            return false;
+//        }
         return true;
     }
 
     public List<ByteArrayResource> getFolder(HttpServletRequest request, String folderName) {
-        return null;
+        return null; // TODO:
     }
 }
