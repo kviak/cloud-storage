@@ -22,6 +22,7 @@ import ru.kviak.cloudstorage.util.jwt.JwtTokenUtils;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,6 +34,11 @@ public class FileMinioService {
     private final UserService userService;
     @Value("${application.url}")
     private String url;
+
+    public String createFolder(HttpServletRequest request, String name){
+        createFolderForNewUser(userService.findByUsername(jwtTokenUtils.getUsername(getToken(request))).get().getEmail(), name);
+        return "Successfully Created!";
+    }
 
     public void createFolderForNewUser(String  email, String username) {
         try {
@@ -157,21 +163,33 @@ public class FileMinioService {
     }
 
     public boolean deleteFolder(HttpServletRequest request, String folderName) {
-//        String folder = userService.findByUsername(jwtTokenUtils.getUsername(getToken(request))).get().getEmail() + "/";
-//        try {
-//            minioClient.deleteObjectTags();
-//                    removeObject(
-//                    RemoveObjectArgs.builder()
-//                            .bucket("cloud-storage")
-//                            .object(folder + folderName) // REWORK
-//                            .build());
-//        } catch (Exception e){
-//            return false;
-//        }
+        String folder = userService.findByUsername(jwtTokenUtils.getUsername(getToken(request))).get().getEmail() + "/";
+        try {
+            minioClient.
+                    removeObject(
+                    RemoveObjectArgs.builder()
+                            .bucket("cloud-storage")
+                            .object(folder + folderName) // REWORK
+                            .build());
+        } catch (Exception e){
+            return false;
+        }
         return true;
     }
 
     public List<ByteArrayResource> getFolder(HttpServletRequest request, String folderName) {
-        return null; // TODO:
+        String folder = userService.findByUsername(jwtTokenUtils.getUsername(getToken(request))).get().getEmail() + "/";
+
+        try (InputStream stream = minioClient.getObject(
+                GetObjectArgs.builder()
+                        .bucket("cloud-storage")
+                        .object(folder + folderName)
+                        .build())) {
+            byte[] data = IOUtils.toByteArray(stream);
+            return new ArrayList<>(Collections.singleton(new ByteArrayResource(data)));
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new FileNotFoundException("File not found exception!");
+        }
     }
 }

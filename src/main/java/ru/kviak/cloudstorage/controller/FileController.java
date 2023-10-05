@@ -53,8 +53,14 @@ public class FileController {
     }
 
     @GetMapping("/folder")
-    public ResponseEntity<List<FolderDto>> getUserFolder(HttpServletRequest request){ // Change to folderDto
+    public ResponseEntity<List<FolderDto>> getUserFolder(HttpServletRequest request){
         return ResponseEntity.ok(fileMinioService.getUserFolder(request));
+    }
+
+    @PostMapping("/folder/{name}")
+    public ResponseEntity<String> createFolder(@PathVariable("name") String folderName, HttpServletRequest request) {
+        System.out.println("goida");
+        return ResponseEntity.ok(fileMinioService.createFolder(request, folderName));
     }
 
     @DeleteMapping("/folder/{path}")
