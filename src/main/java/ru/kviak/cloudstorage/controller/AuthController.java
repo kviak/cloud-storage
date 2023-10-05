@@ -1,5 +1,6 @@
 package ru.kviak.cloudstorage.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,5 +27,10 @@ public class AuthController {
     public ResponseEntity<?> activate(@PathVariable String code){
         authService.activateUser(code);
         return ResponseEntity.ok("Account activated!");
+    }
+
+    @GetMapping("/user")
+    public ResponseEntity<?> getUserInfo(HttpServletRequest request){
+        return ResponseEntity.ok(authService.getUserInfo(request));
     }
 }

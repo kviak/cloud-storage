@@ -8,11 +8,10 @@ import lombok.SneakyThrows;
 import org.apache.commons.compress.utils.IOUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.multipart.MultipartFile;
+import ru.kviak.cloudstorage.dto.FolderDto;
 import ru.kviak.cloudstorage.dto.UserFileDto;
 import ru.kviak.cloudstorage.exception.FileNotFoundException;
 import ru.kviak.cloudstorage.exception.FileSizeExceedException;
@@ -21,21 +20,25 @@ import ru.kviak.cloudstorage.exception.UserNotFoundException;
 import ru.kviak.cloudstorage.util.jwt.JwtTokenUtils;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:4200")
 public class FileMinioService {
     private final MinioClient minioClient;
     private final JwtTokenUtils jwtTokenUtils;
     private final UserService userService;
     @Value("${application.url}")
     private String url;
+
+    public String createFolder(HttpServletRequest request, String name){
+        createFolderForNewUser(userService.findByUsername(jwtTokenUtils.getUsername(getToken(request))).get().getEmail(), name);
+        return "Successfully Created!";
+    }
 
     public void createFolderForNewUser(String  email, String username) {
         try {
@@ -138,8 +141,55 @@ public class FileMinioService {
         List<UserFileDto> files = new ArrayList<>();
         for (Result<Item> result : results) {
             Item item = result.get();
-            files.add(new UserFileDto(item.objectName().replace(email + "/", ""), url+"file/"+item.objectName().replace(" ", "%20").replace(email + "/", "")));
+            files.add(new UserFileDto(item.objectName().replace(email + "/", ""),
+                    url+"file/"+item.objectName().replace(" ", "%20").replace(email + "/", ""),
+                    item.size()));
         }
         return files;
+    }
+
+    public List<FolderDto> getUserFolder(HttpServletRequest request) {
+        String username = jwtTokenUtils.getUsername(getToken(request));
+        return getAllUserFiles(userService.findByUsername(username).get().getEmail()).stream()
+                .filter(file -> file.getFileName().endsWith("/"))
+                .map(userFileDto -> {
+                    FolderDto folderDto = new FolderDto();
+                    folderDto.setPackageName(userFileDto.getFileName());
+                    folderDto.setPackageLink(userFileDto.getLinkFile());
+                    folderDto.setSize(0);
+                    return folderDto;
+                })
+                .collect(Collectors.toList());
+    }
+
+    public boolean deleteFolder(HttpServletRequest request, String folderName) {
+        String folder = userService.findByUsername(jwtTokenUtils.getUsername(getToken(request))).get().getEmail() + "/";
+        try {
+            minioClient.
+                    removeObject(
+                    RemoveObjectArgs.builder()
+                            .bucket("cloud-storage")
+                            .object(folder + folderName) // REWORK
+                            .build());
+        } catch (Exception e){
+            return false;
+        }
+        return true;
+    }
+
+    public List<ByteArrayResource> getFolder(HttpServletRequest request, String folderName) {
+        String folder = userService.findByUsername(jwtTokenUtils.getUsername(getToken(request))).get().getEmail() + "/";
+
+        try (InputStream stream = minioClient.getObject(
+                GetObjectArgs.builder()
+                        .bucket("cloud-storage")
+                        .object(folder + folderName)
+                        .build())) {
+            byte[] data = IOUtils.toByteArray(stream);
+            return new ArrayList<>(Collections.singleton(new ByteArrayResource(data)));
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new FileNotFoundException("File not found exception!");
+        }
     }
 }

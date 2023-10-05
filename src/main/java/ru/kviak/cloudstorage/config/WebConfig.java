@@ -24,7 +24,11 @@ public class WebConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.addAllowedOrigin("http://5.53.125.46:4200");
+        config.addAllowedOrigin("http://localhost:4200");
+        config.addAllowedOrigin("http://5.53.125.46:80");
+        config.addAllowedOrigin("http://5.53.125.46");
+        config.addAllowedOrigin("http://kviak.ru:80");
+        config.addAllowedOrigin("http://kviak.ru");
         config.setAllowedHeaders(Arrays.asList(
                 HttpHeaders.AUTHORIZATION,
                 HttpHeaders.CONTENT_TYPE,
@@ -37,8 +41,6 @@ public class WebConfig {
         config.setMaxAge(MAX_AGE);
         source.registerCorsConfiguration("/**", config);
         FilterRegistrationBean bean = new FilterRegistrationBean(new CorsFilter(source));
-
-        // should be set order to -100 because we need to CorsFilter before SpringSecurityFilter
         bean.setOrder(CORS_FILTER_ORDER);
         return bean;
     }
