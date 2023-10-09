@@ -10,7 +10,6 @@ services:
 
   minio:
     image: kviak/kviak-repo:minio
-
     command: server --console-address ":9001" /data
     volumes:
       - ~\minio\data:/data

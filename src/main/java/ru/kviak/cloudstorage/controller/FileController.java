@@ -59,7 +59,6 @@ public class FileController {
 
     @PostMapping("/folder/{name}")
     public ResponseEntity<String> createFolder(@PathVariable("name") String folderName, HttpServletRequest request) {
-        System.out.println("goida");
         return ResponseEntity.ok(fileMinioService.createFolder(request, folderName));
     }
 
@@ -70,7 +69,7 @@ public class FileController {
     }
 
     @GetMapping("/folder/{path}")
-    public ResponseEntity<?> getFolderFiles(@PathVariable("path") String folderName, HttpServletRequest request){
+    public ResponseEntity<?> getFolderFiles(@PathVariable("path") String folderName, HttpServletRequest request) {
         return ResponseEntity.ok(fileMinioService.getFolder(request, folderName));
     }
 }
