@@ -54,8 +54,9 @@ public class AuthService {
         userService.activateUser(code);
     }
 
-    public String getUserInfo(HttpServletRequest request) {
-        return jwtTokenUtils.getUsername(getToken(request));
+    public UserViewDto getUserInfo(HttpServletRequest request) {
+        User user = userService.findByUsername(jwtTokenUtils.getUsername(getToken(request))).orElseThrow();
+        return new UserViewDto(user.getUsername(), user.getRoles().stream().toList().get(0).getName());
     }
 
     public String getToken(HttpServletRequest request){
