@@ -46,7 +46,25 @@ public class FileMinioService {
                     PutObjectArgs.builder()
                             .bucket("cloud-storage")
                             .object(email + "/" + username + "/").stream(
-                            new ByteArrayInputStream(new byte[] {}), 0, -1)
+                                    new ByteArrayInputStream(new byte[] {}), 0, -1)
+                            .build());
+            minioClient.putObject(
+                    PutObjectArgs.builder()
+                            .bucket("cloud-storage")
+                            .object(email + "/" + "Audios" + "/").stream(
+                                    new ByteArrayInputStream(new byte[] {}), 0, -1)
+                            .build());
+            minioClient.putObject(
+                    PutObjectArgs.builder()
+                            .bucket("cloud-storage")
+                            .object(email + "/" + "Images" + "/").stream(
+                                    new ByteArrayInputStream(new byte[] {}), 0, -1)
+                            .build());
+            minioClient.putObject(
+                    PutObjectArgs.builder()
+                            .bucket("cloud-storage")
+                            .object(email + "/" + "Videos" + "/").stream(
+                                    new ByteArrayInputStream(new byte[] {}), 0, -1)
                             .build());
         }
         catch (Exception e){
