@@ -62,4 +62,9 @@ public class AuthService {
     public String getToken(HttpServletRequest request){
         return request.getHeader(HttpHeaders.AUTHORIZATION).substring(7);
     }
+
+    public boolean addVipRole(HttpServletRequest request) {
+        long userId = userService.findByUsername(jwtTokenUtils.getUsername(getToken(request))).get().getId();
+        return userService.setVipRole(userId);
+    }
 }

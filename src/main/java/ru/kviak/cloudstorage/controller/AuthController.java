@@ -23,6 +23,12 @@ public class AuthController {
         return authService.createNewUser(registrationUserDto);
     }
 
+    @PostMapping("/vip")
+    public ResponseEntity<?> setVipRole(HttpServletRequest request) {
+        if (authService.addVipRole(request)) return ResponseEntity.ok("Vip role success install.");
+            else return ResponseEntity.notFound().build();
+    }
+
     @GetMapping("/activate/{code}")
     public ResponseEntity<?> activate(@PathVariable String code){
         authService.activateUser(code);
