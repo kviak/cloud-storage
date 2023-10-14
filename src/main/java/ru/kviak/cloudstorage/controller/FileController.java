@@ -13,6 +13,7 @@ import ru.kviak.cloudstorage.dto.FolderDto;
 import ru.kviak.cloudstorage.dto.UserFileDto;
 import ru.kviak.cloudstorage.service.FileMinioService;
 
+import java.util.Base64;
 import java.util.List;
 
 @RestController
@@ -34,6 +35,19 @@ public class FileController {
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName)
                 .body(file);
 
+    }
+
+    @GetMapping("/file/share/{code}")
+    public ResponseEntity<Resource> downloadFile(@PathVariable("code") String code) {
+        Base64.Decoder decoder = Base64.getDecoder();
+        byte[] decodedBytes = decoder.decode(code.getBytes());
+        String[] data = new String(decodedBytes).split(" ");
+
+        ByteArrayResource file = fileMinioService.getFile(data[0], data[1]);
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType("application/octet-stream"))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + data[1])
+                .body(file);
     }
 
     @GetMapping("/file")

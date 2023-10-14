@@ -11,6 +11,6 @@ import lombok.Setter;
 @Setter
 public class UserFileDto {
     private String fileName;
-    private String linkFile;
+    private String shareLink;
     private Long fileSize;
 }
