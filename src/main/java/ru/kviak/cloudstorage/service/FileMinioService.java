@@ -79,6 +79,7 @@ public class FileMinioService {
         String token = this.getToken(request);
 
         String userDirectory = userService.findByUsername(jwtTokenUtils.getUsername(token)).get().getEmail() + "/";
+        System.out.println(jwtTokenUtils.getRoles(token));
         boolean isVip = jwtTokenUtils.getRoles(token).contains("ROLE_VIP");
 
         try {
@@ -184,8 +185,10 @@ public class FileMinioService {
         for (Result<Item> result : results) {
             Item item = result.get();
             String fileName = item.objectName().replace(email + "/", "");
+            System.out.println("File name: " + fileName);
+            System.out.println("Email: " + email);
             files.add(new UserFileDto(fileName,
-                    url+"file/share/"+ encoder.encodeToString((email + " " + fileName).getBytes()),
+                    "kviak.ru/share/"+ encoder.encodeToString((email + "&&&" + fileName).getBytes()),
                     item.size()));
         }
         return files;
