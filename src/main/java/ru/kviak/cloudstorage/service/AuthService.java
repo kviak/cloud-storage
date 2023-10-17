@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 import ru.kviak.cloudstorage.dto.*;
 import ru.kviak.cloudstorage.exception.error.AppError;
+import ru.kviak.cloudstorage.model.Role;
 import ru.kviak.cloudstorage.model.User;
 import ru.kviak.cloudstorage.util.jwt.JwtTokenUtils;
 
@@ -56,10 +57,20 @@ public class AuthService {
 
     public UserViewDto getUserInfo(HttpServletRequest request) {
         User user = userService.findByUsername(jwtTokenUtils.getUsername(getToken(request))).orElseThrow();
-        return new UserViewDto(user.getUsername(), user.getRoles().stream().toList().get(0).getName());
+        StringBuilder roles= new StringBuilder();
+
+        for (Role role:user.getRoles()) {
+            roles.append(role.getName()).append(" ");
+        }
+        return new UserViewDto(user.getUsername(), roles.toString());
     }
 
     public String getToken(HttpServletRequest request){
         return request.getHeader(HttpHeaders.AUTHORIZATION).substring(7);
+    }
+
+    public boolean addVipRole(HttpServletRequest request) {
+        long userId = userService.findByUsername(jwtTokenUtils.getUsername(getToken(request))).get().getId();
+        return userService.setVipRole(userId);
     }
 }

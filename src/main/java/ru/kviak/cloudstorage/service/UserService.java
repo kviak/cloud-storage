@@ -3,6 +3,7 @@ package ru.kviak.cloudstorage.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -31,12 +32,17 @@ public class UserService implements UserDetailsService {
     private final PasswordEncoder passwordEncoder;
     private final EmailSenderService mailSender;
     private final UserMapper userMapper;
+    private final JdbcTemplate jdbcTemplate;
 
     @Value("${application.url}")
     private String url;
 
     public Optional<User> findByUsername(String username) {
         return userRepository.findByUsername(username);
+    }
+
+    public Optional<User> findByEmail(String email){
+        return userRepository.findByEmail(email);
     }
 
     @Override
@@ -79,4 +85,11 @@ public class UserService implements UserDetailsService {
         });
         return list;
     }
+
+    @Transactional
+    public boolean setVipRole(long userId){
+        jdbcTemplate.update ("INSERT INTO users_roles VALUES("+userId+", 2);");
+        return true;
+    }
+
 }

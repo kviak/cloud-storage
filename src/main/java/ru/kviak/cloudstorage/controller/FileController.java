@@ -2,6 +2,7 @@ package ru.kviak.cloudstorage.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -13,6 +14,7 @@ import ru.kviak.cloudstorage.dto.FolderDto;
 import ru.kviak.cloudstorage.dto.UserFileDto;
 import ru.kviak.cloudstorage.service.FileMinioService;
 
+import java.util.Base64;
 import java.util.List;
 
 @RestController
@@ -34,6 +36,32 @@ public class FileController {
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName)
                 .body(file);
 
+    }
+
+    @GetMapping("/file/share/{code}")
+    public ResponseEntity<Resource> downloadFile(@PathVariable("code") String code) {
+        Base64.Decoder decoder = Base64.getDecoder();
+        byte[] decodedBytes = decoder.decode(code.getBytes());
+        String[] data = new String(decodedBytes).split("&&&");
+        System.out.println("In controller: " + data[0] + " " + data[1]);
+
+        ByteArrayResource file = fileMinioService.getFile(data[0], data[1]);
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType("application/octet-stream"))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + data[1])
+                .body(file);
+    }
+
+    @SneakyThrows
+    @GetMapping("/file/info/{code}")
+    public ResponseEntity<UserFileDto> getFileInfo(@PathVariable("code") String code) {
+        Base64.Decoder decoder = Base64.getDecoder();
+        byte[] decodedBytes = decoder.decode(code.getBytes());
+        String[] data = new String(decodedBytes).split("&&&");
+        System.out.println("In controller: " + data[0] + " " + data[1]);
+
+        ByteArrayResource file = fileMinioService.getFile(data[0], data[1]);
+        return ResponseEntity.ok(new UserFileDto(file.getFilename(), "http://kviak.ru/share/"+code, file.getFile().getTotalSpace()));
     }
 
     @GetMapping("/file")

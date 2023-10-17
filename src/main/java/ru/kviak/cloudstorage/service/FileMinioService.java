@@ -9,6 +9,7 @@ import org.apache.commons.compress.utils.IOUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.kviak.cloudstorage.dto.FolderDto;
@@ -22,6 +23,7 @@ import ru.kviak.cloudstorage.util.jwt.JwtTokenUtils;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -46,7 +48,25 @@ public class FileMinioService {
                     PutObjectArgs.builder()
                             .bucket("cloud-storage")
                             .object(email + "/" + username + "/").stream(
-                            new ByteArrayInputStream(new byte[] {}), 0, -1)
+                                    new ByteArrayInputStream(new byte[] {}), 0, -1)
+                            .build());
+            minioClient.putObject(
+                    PutObjectArgs.builder()
+                            .bucket("cloud-storage")
+                            .object(email + "/" + "Audios" + "/").stream(
+                                    new ByteArrayInputStream(new byte[] {}), 0, -1)
+                            .build());
+            minioClient.putObject(
+                    PutObjectArgs.builder()
+                            .bucket("cloud-storage")
+                            .object(email + "/" + "Images" + "/").stream(
+                                    new ByteArrayInputStream(new byte[] {}), 0, -1)
+                            .build());
+            minioClient.putObject(
+                    PutObjectArgs.builder()
+                            .bucket("cloud-storage")
+                            .object(email + "/" + "Videos" + "/").stream(
+                                    new ByteArrayInputStream(new byte[] {}), 0, -1)
                             .build());
         }
         catch (Exception e){
@@ -59,6 +79,7 @@ public class FileMinioService {
         String token = this.getToken(request);
 
         String userDirectory = userService.findByUsername(jwtTokenUtils.getUsername(token)).get().getEmail() + "/";
+        System.out.println(jwtTokenUtils.getRoles(token));
         boolean isVip = jwtTokenUtils.getRoles(token).contains("ROLE_VIP");
 
         try {
@@ -88,10 +109,30 @@ public class FileMinioService {
     public ByteArrayResource getFile(HttpServletRequest request, String fileName) {
         String folder = userService.findByUsername(jwtTokenUtils.getUsername(getToken(request))).get().getEmail() + "/";
 
+
         try (InputStream stream = minioClient.getObject(
                 GetObjectArgs.builder()
                         .bucket("cloud-storage")
                         .object(folder + fileName)
+                        .build())) {
+            byte[] data = IOUtils.toByteArray(stream);
+            return new ByteArrayResource(data);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new FileNotFoundException("File not found exception!");
+        }
+    }
+
+    public ByteArrayResource getFile(String email, String fileName) {
+        String absoluteFilePath = email + "/" + fileName;
+        return this.loadFile(absoluteFilePath);
+    }
+
+    private ByteArrayResource loadFile(String absoluteFilePath){
+        try (InputStream stream = minioClient.getObject(
+                GetObjectArgs.builder()
+                        .bucket("cloud-storage")
+                        .object(absoluteFilePath)
                         .build())) {
             byte[] data = IOUtils.toByteArray(stream);
             return new ByteArrayResource(data);
@@ -133,6 +174,8 @@ public class FileMinioService {
 
     @SneakyThrows
     private List<UserFileDto> getAllUserFiles(String email) {
+        Base64.Encoder encoder = Base64.getEncoder();
+
         Iterable<Result<Item>> results = minioClient.listObjects(
                 ListObjectsArgs.builder()
                         .bucket("cloud-storage")
@@ -141,8 +184,11 @@ public class FileMinioService {
         List<UserFileDto> files = new ArrayList<>();
         for (Result<Item> result : results) {
             Item item = result.get();
-            files.add(new UserFileDto(item.objectName().replace(email + "/", ""),
-                    url+"file/"+item.objectName().replace(" ", "%20").replace(email + "/", ""),
+            String fileName = item.objectName().replace(email + "/", "");
+            System.out.println("File name: " + fileName);
+            System.out.println("Email: " + email);
+            files.add(new UserFileDto(fileName,
+                    "kviak.ru/share/"+ encoder.encodeToString((email + "&&&" + fileName).getBytes()),
                     item.size()));
         }
         return files;
@@ -150,12 +196,13 @@ public class FileMinioService {
 
     public List<FolderDto> getUserFolder(HttpServletRequest request) {
         String username = jwtTokenUtils.getUsername(getToken(request));
-        return getAllUserFiles(userService.findByUsername(username).get().getEmail()).stream()
+        String email = userService.findByUsername(username).get().getEmail();
+
+        return getAllUserFiles(email).stream()
                 .filter(file -> file.getFileName().endsWith("/"))
                 .map(userFileDto -> {
                     FolderDto folderDto = new FolderDto();
                     folderDto.setPackageName(userFileDto.getFileName());
-                    folderDto.setPackageLink(userFileDto.getLinkFile());
                     folderDto.setSize(0);
                     return folderDto;
                 })
