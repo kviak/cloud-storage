@@ -36,7 +36,7 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
 
     @ExceptionHandler(value =  {FileSizeExceedException.class, SizeLimitExceededException.class})
     protected ResponseEntity<?> sizeLimitExceedException() {
-        return ResponseEntity.badRequest().body(
+        return ResponseEntity.status(413).body(
                 new AppError(413, """
                         The maximum file size is exceeded!
                         The maximum for regular user, size is 10 MB
