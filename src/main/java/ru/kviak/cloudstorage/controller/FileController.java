@@ -22,6 +22,7 @@ import java.util.List;
 public class FileController {
 
     private final FileMinioService fileMinioService;
+    private final Base64.Decoder decoder = Base64.getDecoder();
 
     @PostMapping("/file")
     public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile[] files, HttpServletRequest request) {
@@ -40,7 +41,6 @@ public class FileController {
 
     @GetMapping("/file/share/{code}")
     public ResponseEntity<Resource> downloadFile(@PathVariable("code") String code) {
-        Base64.Decoder decoder = Base64.getDecoder();
         byte[] decodedBytes = decoder.decode(code.getBytes());
         String[] data = new String(decodedBytes).split("&&&");
         System.out.println("In controller: " + data[0] + " " + data[1]);
@@ -55,7 +55,6 @@ public class FileController {
     @SneakyThrows
     @GetMapping("/file/info/{code}")
     public ResponseEntity<UserFileDto> getFileInfo(@PathVariable("code") String code) {
-        Base64.Decoder decoder = Base64.getDecoder();
         byte[] decodedBytes = decoder.decode(code.getBytes());
         String[] data = new String(decodedBytes).split("&&&");
         System.out.println("In controller: " + data[0] + " " + data[1]);
